@@ -97,7 +97,7 @@ const Index = () => {
         {/* Map Container */}
         <div className="h-[70vh] w-full relative">
           <MapContainer
-            center={[40.4168, -3.7038]}
+            center={[40.4168, -3.7038] as [number, number]}
             zoom={6}
             style={{ height: '100%', width: '100%' }}
             ref={mapRef}
@@ -117,7 +117,7 @@ const Index = () => {
                   return (
                     <Marker
                       key={index}
-                      position={[lat, lng]}
+                      position={[lat, lng] as [number, number]}
                       icon={getMarkerIcon(props.signalStrength)}
                       eventHandlers={{
                         click: () => handlePointClick(props),
