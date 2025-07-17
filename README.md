@@ -1,73 +1,171 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🏔️ Outdoor Explorer - Aplicación Web Interactiva
 
-**URL**: https://lovable.dev/projects/f291d3bd-69e1-4e3b-a5d8-c89b68efd492
+Una aplicación web responsive orientada a actividades outdoor que permite explorar refugios, senderos, miradores y campings a través de un mapa interactivo con datos geoespaciales.
 
-## How can I edit this code?
+## 🎯 Características Principales
 
-There are several ways of editing your application.
+- **Mapa Interactivo**: Powered by Leaflet.js con clustering automático de puntos
+- **Datos GeoJSON**: Carga y visualización de puntos de interés y áreas geográficas
+- **Filtrado Inteligente**: Selección de áreas para mostrar solo puntos contenidos
+- **Panel Lateral**: Información detallada al hacer clic en cualquier punto
+- **Diseño Responsive**: Optimizado para desktop, tablet y móvil
+- **Estética Natural**: Colores inspirados en la naturaleza (verdes, ocres, azul cielo)
 
-**Use Lovable**
+## 🧭 Funcionalidades
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f291d3bd-69e1-4e3b-a5d8-c89b68efd492) and start prompting.
+### Mapa
+- Visualización de puntos con iconos diferenciados por categoría
+- Clustering automático para mejor organización visual
+- Popups informativos al pasar sobre los puntos
+- Áreas seleccionables con filtrado automático
+- Botón de "Reiniciar vista" para volver al mapa completo
 
-Changes made via Lovable will be committed automatically to this repo.
+### Interfaz
+- **Header**: Imagen de fondo outdoor con título y descripción
+- **Leyenda**: Código de colores para diferentes tipos de puntos
+- **Estadísticas**: Contador dinámico de puntos y áreas mostradas
+- **Sidebar**: Panel deslizable con información detallada de cada punto
 
-**Use your preferred IDE**
+## 🛠️ Tecnologías Utilizadas
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **React 18** - Framework principal
+- **TypeScript** - Tipado estático
+- **Leaflet.js** - Mapas interactivos
+- **React-Leaflet** - Integración React + Leaflet
+- **Tailwind CSS** - Estilos y diseño responsive
+- **Vite** - Build tool y servidor de desarrollo
+- **Lucide React** - Iconografía
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📦 Estructura del Proyecto
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/
+│   ├── Header.tsx          # Cabecera con imagen de fondo
+│   └── Sidebar.tsx         # Panel lateral de información
+├── data/
+│   └── outdoor-data.ts     # Datos GeoJSON con puntos y áreas
+└── pages/
+    └── Index.tsx           # Página principal con mapa
 ```
 
-**Edit a file directly in GitHub**
+## 🚀 Instalación y Uso
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Requisitos Previos
+- Node.js 16+ 
+- npm o yarn
 
-**Use GitHub Codespaces**
+### Pasos de Instalación
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. **Clonar el repositorio**
+   ```bash
+   git clone <repository-url>
+   cd outdoor-explorer
+   ```
 
-## What technologies are used for this project?
+2. **Instalar dependencias**
+   ```bash
+   npm install
+   ```
 
-This project is built with:
+3. **Iniciar servidor de desarrollo**
+   ```bash
+   npm run dev
+   ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+4. **Abrir en navegador**
+   ```
+   http://localhost:8080
+   ```
 
-## How can I deploy this project?
+### Uso sin Servidor Local
+Para usar sin servidor de desarrollo, simplemente abre `index.html` en cualquier navegador moderno.
 
-Simply open [Lovable](https://lovable.dev/projects/f291d3bd-69e1-4e3b-a5d8-c89b68efd492) and click on Share -> Publish.
+## 📊 Datos Incluidos
 
-## Can I connect a custom domain to my Lovable project?
+### Puntos de Interés (5 ejemplos)
+- **Refugio de Peñalara** (Sierra de Guadarrama) - Refugio de montaña
+- **Sendero de La Mujer Muerta** (Segovia) - Ruta de senderismo  
+- **Mirador del Naranjo de Bulnes** (Asturias) - Mirador panorámico
+- **Camping Urrobi** (Navarra) - Camping ecológico
+- **Refugio de Góriz** (Pirineos) - Refugio de alta montaña
 
-Yes, you can!
+### Áreas Geográficas (3 polígonos)
+- Sierra de Guadarrama
+- Picos de Europa  
+- Pirineos Centrales
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Cada punto incluye:
+- Nombre y descripción detallada
+- Coordenadas GPS
+- Imagen representativa
+- Operador/gestor
+- Nivel de dificultad
+- Categoría (db): refugios, senderos, miradores, campings
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🎨 Diseño y UX
+
+### Paleta de Colores
+- **Verde Natural**: `#228B22` - Senderos y vegetación
+- **Ocre Tierra**: `#DAA520` - Campings y naturaleza
+- **Azul Cielo**: `#4169E1` - Miradores y agua
+- **Marrón Refugio**: `#8B4513` - Refugios y construcciones
+
+### Responsive Design
+- **Mobile First**: Optimización para dispositivos móviles
+- **Sidebar Adaptable**: Panel que se convierte en overlay en móviles
+- **Controles Touch**: Optimizados para pantallas táctiles
+
+## 🔧 Personalización
+
+### Añadir Nuevos Puntos
+Edita `src/data/outdoor-data.ts` y añade nuevos features al array:
+
+```typescript
+{
+  type: "Feature",
+  geometry: {
+    type: "Point", 
+    coordinates: [longitude, latitude]
+  },
+  properties: {
+    nombre: "Nombre del lugar",
+    descripcion: "Descripción detallada...",
+    imagen: "URL de la imagen",
+    operador: "Gestor del lugar",
+    db: "categoria", // refugios, senderos, miradores, campings
+    level: "Dificultad"
+  }
+}
+```
+
+### Modificar Estilos
+Los estilos están definidos con Tailwind CSS en cada componente. Para cambiar colores o diseño, modifica las clases correspondientes.
+
+## 📱 Capturas de Pantalla
+
+*Las capturas se mostrarían aquí en un proyecto real*
+
+## 🤝 Contribuir
+
+1. Fork del proyecto
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para detalles.
+
+## 🙏 Reconocimientos
+
+- Imágenes de [Unsplash](https://unsplash.com)
+- Mapas base de [OpenStreetMap](https://www.openstreetmap.org)
+- Iconos de [Lucide](https://lucide.dev)
+- Desarrollado con [Lovable](https://lovable.dev)
+
+---
+
+**¡Disfruta explorando la naturaleza! 🌲🏔️**
