@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, MapPin, User, Star, Calendar } from 'lucide-react';
+import { X, Radio, Clock, Signal } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -9,144 +9,123 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, selectedPoint }) => {
+  const getSignalCategory = (signalStrength: number) => {
+    if (signalStrength >= -70) return { category: 'Excelente', color: 'text-green-600' };
+    if (signalStrength >= -85) return { category: 'Buena', color: 'text-yellow-600' };
+    if (signalStrength >= -95) return { category: 'Regular', color: 'text-gray-600' };
+    if (signalStrength >= -105) return { category: 'Pobre', color: 'text-red-600' };
+    return { category: 'Muy Pobre / Sin Servicio', color: 'text-black' };
+  };
+
   if (!isOpen || !selectedPoint) return null;
 
-  const getDbColor = (db: string) => {
-    const colors = {
-      'refugios': 'bg-amber-100 text-amber-800',
-      'senderos': 'bg-green-100 text-green-800',
-      'miradores': 'bg-blue-100 text-blue-800',
-      'campings': 'bg-yellow-100 text-yellow-800'
-    };
-    return colors[db] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getDbIcon = (db: string) => {
-    const icons = {
-      'refugios': '🏔️',
-      'senderos': '🥾',
-      'miradores': '👁️',
-      'campings': '🏕️'
-    };
-    return icons[db] || '📍';
-  };
+  const { category, color } = getSignalCategory(selectedPoint.signalStrength);
 
   return (
-    <>
-      {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black/50 z-[1001] md:hidden"
-        onClick={onClose}
-      />
-      
-      {/* Sidebar */}
-      <div className={`
-        fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-[1002] 
-        transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        overflow-y-auto
-      `}>
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-green-800">Información del Lugar</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X size={24} />
-            </button>
+    <div className="fixed inset-y-0 right-0 z-50 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-green-800 flex items-center gap-2">
+            <Radio size={20} />
+            Medición Celular
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-green-50 p-4 rounded-lg">
+            <h3 className="font-bold text-green-800 mb-2">{selectedPoint.operatorName}</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Red:</span>
+                <span className="font-medium">{selectedPoint.networkType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tipo:</span>
+                <span className="font-medium">{selectedPoint.connectionType}</span>
+              </div>
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="space-y-6">
-            {/* Main Image */}
-            {selectedPoint.imagen && (
-              <div className="relative h-48 rounded-lg overflow-hidden shadow-md">
-                <img
-                  src={selectedPoint.imagen}
-                  alt={selectedPoint.nombre}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white">
-                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getDbColor(selectedPoint.db)}`}>
-                    {getDbIcon(selectedPoint.db)} {selectedPoint.db}
-                  </span>
-                </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <Signal size={16} />
+              Intensidad de Señal
+            </h4>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Potencia:</span>
+                <span className="font-mono text-lg">{selectedPoint.signalStrength} dBm</span>
               </div>
-            )}
-
-            {/* Title and basic info */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{selectedPoint.nombre}</h3>
-              
-              <div className="flex items-center gap-2 text-gray-600 mb-3">
-                <MapPin size={16} />
-                <span className="text-sm">
-                  Coordenadas: {selectedPoint.coordenadas?.[1]?.toFixed(4)}, {selectedPoint.coordenadas?.[0]?.toFixed(4)}
-                </span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Calidad:</span>
+                <span className={`font-medium ${color}`}>{category}</span>
               </div>
-
-              {selectedPoint.operador && (
-                <div className="flex items-center gap-2 text-gray-600 mb-3">
-                  <User size={16} />
-                  <span className="text-sm">Operador: {selectedPoint.operador}</span>
-                </div>
-              )}
-
-              {selectedPoint.level && (
-                <div className="flex items-center gap-2 text-gray-600 mb-3">
-                  <Star size={16} />
-                  <span className="text-sm">Nivel: {selectedPoint.level}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Description */}
-            {selectedPoint.descripcion && (
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Descripción</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {selectedPoint.descripcion}
-                </p>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">ASU:</span>
+                <span className="font-mono">{selectedPoint.asu}</span>
               </div>
-            )}
-
-            {/* Additional Info Card */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
-                <Calendar size={16} />
-                Información Adicional
-              </h4>
-              <div className="space-y-2 text-sm text-green-700">
-                <p>• Consulta siempre las condiciones meteorológicas antes de tu visita</p>
-                <p>• Respeta el entorno natural y las normativas locales</p>
-                <p>• Lleva equipo adecuado según la actividad</p>
-                {selectedPoint.db === 'refugios' && (
-                  <p>• Se recomienda reservar con antelación</p>
-                )}
-                {selectedPoint.db === 'senderos' && (
-                  <p>• Informa a alguien de tu ruta planificada</p>
-                )}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Nivel:</span>
+                <span className="font-mono">{selectedPoint.signalLevel}/5</span>
               </div>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-3 pt-4 border-t">
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                Ver en Google Maps
-              </button>
-              <button className="w-full border border-green-600 text-green-600 hover:bg-green-50 py-3 px-4 rounded-lg font-medium transition-colors">
-                Compartir Ubicación
-              </button>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-bold text-blue-800 mb-3">Información Técnica</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Cell ID:</span>
+                <span className="font-mono">{selectedPoint.cellId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">LAC:</span>
+                <span className="font-mono">{selectedPoint.lac}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <h4 className="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+              <Clock size={16} />
+              Timestamp
+            </h4>
+            <p className="text-sm font-mono text-gray-700">{selectedPoint.timestamp}</p>
+          </div>
+
+          <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+            <h5 className="font-bold text-gray-800 mb-2">Rangos de Señal</h5>
+            <div className="space-y-1 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>-50 a -70 dBm: Excelente</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span>-71 a -85 dBm: Buena</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-white border border-gray-400 rounded-full"></div>
+                <span>-86 a -95 dBm: Regular</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span>-96 a -105 dBm: Pobre</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-black rounded-full"></div>
+                <span>-110 dBm o menos: Sin servicio</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };

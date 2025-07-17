@@ -6,8 +6,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
-import { geoJsonData } from '../data/outdoor-data';
-import { RotateCcw, Mountain } from 'lucide-react';
+import { cellularData } from '../data/cellular-data';
+import { RotateCcw, Radio } from 'lucide-react';
 
 // Fix for default markers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -19,13 +19,13 @@ L.Icon.Default.mergeOptions({
 
 const Index = () => {
   const [selectedPoint, setSelectedPoint] = useState(null);
-  const [filteredPoints, setFilteredPoints] = useState(geoJsonData.features);
+  const [filteredPoints, setFilteredPoints] = useState(cellularData.features);
   const [selectedArea, setSelectedArea] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const mapRef = useRef(null);
 
   const resetView = () => {
-    setFilteredPoints(geoJsonData.features);
+    setFilteredPoints(cellularData.features);
     setSelectedArea(null);
     setSelectedPoint(null);
     setIsSidebarOpen(false);
@@ -39,67 +39,27 @@ const Index = () => {
     setIsSidebarOpen(true);
   };
 
-  const handleAreaClick = (area) => {
-    setSelectedArea(area);
-    // Filter points that are within the selected area
-    const pointsInArea = geoJsonData.features.filter(feature => {
-      if (feature.geometry.type !== 'Point') return false;
-      
-      const point = L.latLng(
-        feature.geometry.coordinates[1], 
-        feature.geometry.coordinates[0]
-      );
-      
-      // Simple bounding box check for demo
-      const bounds = L.geoJSON(area).getBounds();
-      return bounds.contains(point);
-    });
-    
-    setFilteredPoints(pointsInArea);
-    setIsSidebarOpen(false);
+  const getSignalCategory = (signalStrength) => {
+    if (signalStrength >= -70) return { category: 'Excelente', color: '#22c55e' };
+    if (signalStrength >= -85) return { category: 'Buena', color: '#eab308' };
+    if (signalStrength >= -95) return { category: 'Regular', color: '#ffffff' };
+    if (signalStrength >= -105) return { category: 'Pobre', color: '#ef4444' };
+    return { category: 'Muy Pobre / Sin Servicio', color: '#000000' };
   };
 
-  const getMarkerIcon = (db) => {
-    const colors = {
-      'refugios': '#8B4513',
-      'senderos': '#228B22', 
-      'miradores': '#4169E1',
-      'campings': '#DAA520'
-    };
+  const getMarkerIcon = (signalStrength) => {
+    const { color } = getSignalCategory(signalStrength);
     
     return new L.Icon({
       iconUrl: `data:image/svg+xml;base64,${btoa(`
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-          <circle cx="12" cy="12" r="10" fill="${colors[db] || '#666'}" stroke="#fff" stroke-width="2"/>
-          <circle cx="12" cy="12" r="3" fill="#fff"/>
+          <circle cx="12" cy="12" r="10" fill="${color}" stroke="#333" stroke-width="2"/>
+          <circle cx="12" cy="12" r="3" fill="#333"/>
         </svg>
       `)}`,
       iconSize: [24, 24],
       iconAnchor: [12, 12],
     });
-  };
-
-  const pointToLayer = (feature, latlng) => {
-    return L.marker(latlng, {
-      icon: getMarkerIcon(feature.properties.db)
-    });
-  };
-
-  const onEachFeature = (feature, layer) => {
-    if (feature.geometry.type === 'Point') {
-      layer.bindPopup(`<strong>${feature.properties.nombre}</strong>`);
-      layer.on('click', () => handlePointClick(feature.properties));
-    } else if (feature.geometry.type === 'Polygon') {
-      layer.setStyle({
-        fillColor: '#90EE90',
-        weight: 2,
-        opacity: 1,
-        color: '#228B22',
-        fillOpacity: 0.3
-      });
-      layer.bindPopup(`<strong>Área: ${feature.properties.nombre}</strong>`);
-      layer.on('click', () => handleAreaClick(feature));
-    }
   };
 
   return (
@@ -124,19 +84,23 @@ const Index = () => {
               {filteredPoints.map((feature, index) => {
                 if (feature.geometry.type === 'Point') {
                   const [lng, lat] = feature.geometry.coordinates;
+                  const props = feature.properties;
+                  const { category } = getSignalCategory(props.signalStrength);
+                  
                   return (
                     <Marker
                       key={index}
                       position={[lat, lng]}
-                      icon={getMarkerIcon(feature.properties.db)}
+                      icon={getMarkerIcon(props.signalStrength)}
                       eventHandlers={{
-                        click: () => handlePointClick(feature.properties),
+                        click: () => handlePointClick(props),
                       }}
                     >
                       <Popup>
                         <div className="text-center">
-                          <h3 className="font-bold text-green-800">{feature.properties.nombre}</h3>
-                          <p className="text-sm text-gray-600">{feature.properties.descripcion?.substring(0, 100)}...</p>
+                          <h3 className="font-bold text-green-800">{props.operatorName}</h3>
+                          <p className="text-sm text-gray-600">Señal: {props.signalStrength} dBm ({category})</p>
+                          <p className="text-xs text-gray-500">{props.networkType} - {props.connectionType}</p>
                         </div>
                       </Popup>
                     </Marker>
@@ -145,14 +109,6 @@ const Index = () => {
                 return null;
               })}
             </MarkerClusterGroup>
-
-            <GeoJSON
-              data={{
-                type: 'FeatureCollection',
-                features: geoJsonData.features.filter(f => f.geometry.type === 'Polygon')
-              }}
-              onEachFeature={onEachFeature}
-            />
           </MapContainer>
 
           {/* Reset Button */}
@@ -167,25 +123,29 @@ const Index = () => {
           {/* Legend */}
           <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
             <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
-              <Mountain size={16} />
-              Leyenda
+              <Radio size={16} />
+              Intensidad de Señal
             </h4>
             <div className="space-y-1 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-amber-600"></div>
-                <span>Refugios</span>
+                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                <span>Excelente (-50 a -70 dBm)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-green-600"></div>
-                <span>Senderos</span>
+                <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                <span>Buena (-71 a -85 dBm)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-blue-600"></div>
-                <span>Miradores</span>
+                <div className="w-4 h-4 rounded-full bg-white border border-gray-400"></div>
+                <span>Regular (-86 a -95 dBm)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-yellow-600"></div>
-                <span>Campings</span>
+                <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                <span>Pobre (-96 a -105 dBm)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-black"></div>
+                <span>Sin Servicio (-110 dBm o menos)</span>
               </div>
             </div>
           </div>
@@ -202,24 +162,26 @@ const Index = () => {
         <div className="bg-white/80 backdrop-blur-sm p-6 mx-4 -mt-8 relative z-10 rounded-lg shadow-lg">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-green-700">{filteredPoints.filter(f => f.geometry.type === 'Point').length}</p>
-              <p className="text-sm text-gray-600">Puntos mostrados</p>
+              <p className="text-2xl font-bold text-green-700">{filteredPoints.length}</p>
+              <p className="text-sm text-gray-600">Mediciones</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-blue-700">{geoJsonData.features.filter(f => f.geometry.type === 'Polygon').length}</p>
-              <p className="text-sm text-gray-600">Áreas disponibles</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-amber-700">
-                {filteredPoints.filter(f => f.properties?.db === 'refugios').length}
+              <p className="text-2xl font-bold text-blue-700">
+                {filteredPoints.filter(f => getSignalCategory(f.properties?.signalStrength).category === 'Excelente').length}
               </p>
-              <p className="text-sm text-gray-600">Refugios</p>
+              <p className="text-sm text-gray-600">Excelente</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-green-700">
-                {filteredPoints.filter(f => f.properties?.db === 'senderos').length}
+              <p className="text-2xl font-bold text-yellow-700">
+                {filteredPoints.filter(f => getSignalCategory(f.properties?.signalStrength).category === 'Buena').length}
               </p>
-              <p className="text-sm text-gray-600">Senderos</p>
+              <p className="text-sm text-gray-600">Buena</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-red-700">
+                {filteredPoints.filter(f => ['Pobre', 'Muy Pobre / Sin Servicio'].includes(getSignalCategory(f.properties?.signalStrength).category)).length}
+              </p>
+              <p className="text-sm text-gray-600">Pobre/Sin servicio</p>
             </div>
           </div>
         </div>

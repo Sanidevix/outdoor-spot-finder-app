@@ -1,35 +1,25 @@
 
 import React from 'react';
-import { Mountain, Compass } from 'lucide-react';
+import { Radio } from 'lucide-react';
 
-export const Header = () => {
+export const Header: React.FC = () => {
   return (
-    <header 
-      className="relative h-64 bg-cover bg-center bg-no-repeat flex items-center justify-center"
+    <header
+      className="relative h-48 bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"
+        backgroundImage: "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d')",
       }}
     >
-      <div className="text-center text-white space-y-4 max-w-4xl mx-auto px-4">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Mountain size={48} className="text-green-400" />
-          <h1 className="text-4xl md:text-6xl font-bold tracking-wide">
-            Outdoor Explorer
-          </h1>
-          <Compass size={48} className="text-blue-400" />
+      <div className="absolute inset-0 bg-black/40"></div>
+      <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Radio size={32} className="text-green-400" />
+          <h1 className="text-4xl font-bold">Mapa de Cobertura Celular</h1>
         </div>
-        
-        <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
-          Descubre los mejores refugios, senderos, miradores y campings para tus aventuras al aire libre. 
-          Explora la naturaleza con información detallada y mapas interactivos.
+        <p className="text-lg text-green-100 max-w-2xl">
+          Visualiza la calidad de señal de las redes móviles en tiempo real. 
+          Explora mediciones de diferentes operadores y tecnologías de red.
         </p>
-        
-        <div className="flex flex-wrap justify-center gap-4 text-sm">
-          <span className="bg-green-600/80 px-3 py-1 rounded-full">🏔️ Montañismo</span>
-          <span className="bg-blue-600/80 px-3 py-1 rounded-full">🥾 Senderismo</span>
-          <span className="bg-amber-600/80 px-3 py-1 rounded-full">🏕️ Camping</span>
-          <span className="bg-purple-600/80 px-3 py-1 rounded-full">📸 Fotografía</span>
-        </div>
       </div>
     </header>
   );
