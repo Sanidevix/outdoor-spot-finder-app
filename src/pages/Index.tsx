@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
+import { FileUploader } from '../components/FileUploader';
 import { cellularData } from '../data/cellular-data';
 import { RotateCcw, Radio } from 'lucide-react';
 
@@ -22,6 +23,7 @@ const Index = () => {
   const [filteredPoints, setFilteredPoints] = useState(cellularData.features);
   const [selectedArea, setSelectedArea] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFileUploaderOpen, setIsFileUploaderOpen] = useState(false);
   const mapRef = useRef(null);
 
   const resetView = () => {
@@ -37,6 +39,31 @@ const Index = () => {
   const handlePointClick = (point) => {
     setSelectedPoint(point);
     setIsSidebarOpen(true);
+  };
+
+  const handleFileUpload = (data) => {
+    // Convert uploaded data to the expected GeoJSON format
+    const convertedFeatures = data.map((item, index) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [item.longitude, item.latitude]
+      },
+      properties: {
+        cellId: item.cellId,
+        connectionType: item.connectionType,
+        lac: item.lac,
+        networkType: item.networkType,
+        operatorName: item.operatorName,
+        signalLevel: item.signalLevel,
+        signalStrength: item.signalStrength,
+        asu: item.asu,
+        timestamp: item.timestamp
+      }
+    }));
+    
+    setFilteredPoints(convertedFeatures);
+    setIsFileUploaderOpen(false);
   };
 
   const getSignalCategory = (signalStrength) => {
@@ -111,14 +138,24 @@ const Index = () => {
             </MarkerClusterGroup>
           </MapContainer>
 
-          {/* Reset Button */}
-          <button
-            onClick={resetView}
-            className="absolute top-4 right-4 z-[1000] bg-green-700 hover:bg-green-800 text-white p-3 rounded-full shadow-lg transition-colors"
-            title="Reiniciar vista"
-          >
-            <RotateCcw size={20} />
-          </button>
+          {/* Control Buttons */}
+          <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+            <button
+              onClick={resetView}
+              className="bg-green-700 hover:bg-green-800 text-white p-3 rounded-full shadow-lg transition-colors"
+              title="Reiniciar vista"
+            >
+              <RotateCcw size={20} />
+            </button>
+            
+            <button
+              onClick={() => setIsFileUploaderOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors"
+              title="Subir archivo GeoJSON"
+            >
+              <Radio size={20} />
+            </button>
+          </div>
 
           {/* Legend */}
           <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
@@ -156,6 +193,13 @@ const Index = () => {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           selectedPoint={selectedPoint}
+        />
+
+        {/* File Uploader */}
+        <FileUploader
+          isOpen={isFileUploaderOpen}
+          onClose={() => setIsFileUploaderOpen(false)}
+          onUpload={handleFileUpload}
         />
 
         {/* Stats */}
